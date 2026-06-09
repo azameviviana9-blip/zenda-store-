@@ -1,0 +1,411 @@
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FAF8F5; --sand: #F0EBE3; --charcoal: #1C1C1E;
+    --charcoal-soft: #3A3A3C; --sage: #7A9E7E; --sage-light: #EEF4EF;
+    --sage-dark: #4E7052; --muted: #8A8A8E; --border: #E5E0D8;
+    --white: #FFFFFF; --danger: #E24B4A; --danger-light: #FCEBEB;
+  }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--cream); color: var(--charcoal); font-size: 14px; }
+
+  .topbar {
+    background: var(--white); border-bottom: 1px solid var(--border);
+    padding: 0 1.5rem; height: 56px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  }
+  .logo { font-size: 1.2rem; font-weight: 600; letter-spacing: -0.02em; }
+  .logo span { color: var(--sage); }
+  .badge-admin { background: var(--sage-light); color: var(--sage-dark); font-size: 0.7rem; font-weight: 500; padding: 2px 10px; border-radius: 100px; }
+
+  .layout { display: grid; grid-template-columns: 320px 1fr; gap: 0; min-height: calc(100vh - 56px); }
+
+  .sidebar {
+    background: var(--white); border-right: 1px solid var(--border);
+    padding: 1.5rem; overflow-y: auto;
+  }
+  .sidebar-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+
+  .form-group { margin-bottom: 1rem; }
+  label { display: block; font-size: 0.78rem; font-weight: 500; color: var(--charcoal-soft); margin-bottom: 0.35rem; }
+  input[type=text], input[type=number], textarea, select {
+    width: 100%; padding: 0.55rem 0.75rem; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 0.875rem; font-family: inherit;
+    background: var(--cream); color: var(--charcoal);
+    transition: border-color 0.2s; outline: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--sage); background: var(--white); }
+  textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+
+  .img-upload-area {
+    border: 2px dashed var(--border); border-radius: 12px;
+    padding: 1.25rem; text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s; position: relative;
+  }
+  .img-upload-area:hover { border-color: var(--sage); background: var(--sage-light); }
+  .img-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-preview { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 8px; margin-bottom: 0.5rem; display: none; }
+  .upload-label { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+  .upload-label strong { display: block; color: var(--charcoal-soft); font-weight: 500; margin-bottom: 0.2rem; }
+
+  .multi-img-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+  .mini-thumb { position: relative; width: 64px; height: 64px; }
+  .mini-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+  .mini-thumb button { position: absolute; top: -6px; right: -6px; background: var(--danger); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+  .btn { display: block; width: 100%; padding: 0.65rem; border-radius: 100px; font-size: 0.875rem; font-weight: 500; cursor: pointer; font-family: inherit; border: none; transition: all 0.2s; text-align: center; }
+  .btn-primary { background: var(--charcoal); color: white; }
+  .btn-primary:hover { background: var(--charcoal-soft); }
+  .btn-sage { background: var(--sage); color: white; }
+  .btn-sage:hover { background: var(--sage-dark); }
+  .btn-danger { background: var(--danger-light); color: var(--danger); border: 1px solid #f7c1c1; }
+  .btn-danger:hover { background: var(--danger); color: white; }
+  .btn-outline { background: transparent; color: var(--charcoal); border: 1.5px solid var(--border); }
+  .btn-outline:hover { border-color: var(--charcoal); }
+  .btn + .btn { margin-top: 0.5rem; }
+
+  .main { padding: 1.5rem; overflow-y: auto; }
+  .main-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+  .main-title { font-size: 1.1rem; font-weight: 600; }
+  .count-badge { background: var(--sand); color: var(--muted); font-size: 0.75rem; padding: 2px 10px; border-radius: 100px; }
+
+  .filter-bar { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .filter-btn { padding: 0.35rem 1rem; border-radius: 100px; font-size: 0.78rem; font-weight: 500; border: 1px solid var(--border); background: var(--white); color: var(--charcoal-soft); cursor: pointer; transition: all 0.2s; font-family: inherit; }
+  .filter-btn.active { background: var(--charcoal); color: white; border-color: var(--charcoal); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+
+  .prod-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; position: relative;
+  }
+  .prod-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(28,28,30,0.08); }
+  .prod-card.editing { border-color: var(--sage); box-shadow: 0 0 0 3px var(--sage-light); }
+
+  .prod-img { width: 100%; aspect-ratio: 4/5; object-fit: cover; background: var(--sand); display: block; }
+  .prod-img-placeholder { width: 100%; aspect-ratio: 4/5; background: var(--sand); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 2rem; }
+  .prod-body { padding: 0.85rem; }
+  .prod-badge { display: inline-block; background: var(--sage-light); color: var(--sage-dark); font-size: 0.65rem; font-weight: 600; padding: 1px 8px; border-radius: 100px; letter-spacing: 0.04em; margin-bottom: 0.35rem; }
+  .prod-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.15rem; }
+  .prod-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.4; margin-bottom: 0.6rem; }
+  .prod-price { font-size: 1rem; font-weight: 600; }
+  .prod-actions { display: flex; gap: 0.4rem; margin-top: 0.6rem; }
+  .prod-actions button { flex: 1; padding: 0.35rem 0; border-radius: 8px; font-size: 0.75rem; font-weight: 500; cursor: pointer; border: none; font-family: inherit; transition: all 0.2s; }
+  .btn-edit { background: var(--sand); color: var(--charcoal); }
+  .btn-edit:hover { background: var(--border); }
+  .btn-del { background: var(--danger-light); color: var(--danger); }
+  .btn-del:hover { background: var(--danger); color: white; }
+
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+  .empty-state p { font-size: 0.9rem; }
+
+  .toast {
+    position: fixed; bottom: 1.5rem; right: 1.5rem;
+    background: var(--charcoal); color: white; padding: 0.75rem 1.25rem;
+    border-radius: 100px; font-size: 0.85rem; font-weight: 500;
+    transform: translateY(100px); opacity: 0; transition: all 0.3s;
+    z-index: 999;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: var(--sage); }
+
+  .img-counter { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+  @media (max-width: 700px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+
+<div class="topbar">
+  <div class="logo">Zenda<span>.</span> <span style="font-size:0.8rem;font-weight:400;color:var(--muted);margin-left:0.5rem">Admin</span></div>
+  <span class="badge-admin">Panel de administración</span>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR FORMULARIO -->
+  <aside class="sidebar">
+    <div class="sidebar-title" id="form-mode-label">Agregar producto</div>
+
+    <div class="form-group">
+      <label>Imágenes del producto</label>
+      <div class="img-upload-area" id="upload-area">
+        <input type="file" accept="image/*" multiple id="img-input">
+        <div id="upload-placeholder">
+          <div style="font-size:1.8rem;margin-bottom:0.5rem;opacity:0.4">📷</div>
+          <div class="upload-label">
+            <strong>Subí las fotos del producto</strong>
+            Podés seleccionar varias a la vez
+          </div>
+        </div>
+      </div>
+      <div class="multi-img-row" id="thumbs-row"></div>
+      <div class="img-counter" id="img-counter"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="prod-name">Nombre de la prenda</label>
+      <input type="text" id="prod-name" placeholder="Ej: Remera Oversize Negra">
+    </div>
+
+    <div class="form-group">
+      <label for="prod-cat">Categoría</label>
+      <select id="prod-cat">
+        <option value="Remeras">Remeras</option>
+        <option value="Buzos">Buzos</option>
+        <option value="Jeans">Jeans</option>
+        <option value="Camperas">Camperas</option>
+        <option value="Vestidos">Vestidos</option>
+        <option value="Pantalones">Pantalones</option>
+        <option value="Accesorios">Accesorios</option>
+        <option value="Calzado">Calzado</option>
+        <option value="Nuevo">Nuevo</option>
+        <option value="Oferta">Oferta</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="prod-price">Precio ($)</label>
+      <input type="number" id="prod-price" placeholder="Ej: 15000" min="0">
+    </div>
+
+    <div class="form-group">
+      <label for="prod-desc">Descripción breve</label>
+      <textarea id="prod-desc" placeholder="Describe la prenda: tela, talle, colores disponibles..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="prod-sizes">Talles disponibles</label>
+      <input type="text" id="prod-sizes" placeholder="Ej: XS, S, M, L, XL">
+    </div>
+
+    <button class="btn btn-sage" id="save-btn" onclick="saveProduct()">Guardar producto</button>
+    <button class="btn btn-outline" id="cancel-btn" onclick="cancelEdit()" style="display:none">Cancelar edición</button>
+
+    <hr class="divider">
+    <div class="sidebar-title">Exportar catálogo</div>
+    <button class="btn btn-outline" onclick="exportJSON()">Descargar JSON del catálogo</button>
+  </aside>
+
+  <!-- MAIN PANEL -->
+  <main class="main">
+    <div class="main-header">
+      <span class="main-title">Catálogo</span>
+      <span class="count-badge" id="count-badge">0 productos</span>
+    </div>
+
+    <div class="filter-bar" id="filter-bar">
+      <button class="filter-btn active" onclick="filterCat('Todos', this)">Todos</button>
+    </div>
+
+    <div class="grid" id="products-grid"></div>
+
+    <div class="empty-state" id="empty-state">
+      <div class="icon">🛍️</div>
+      <p>Todavía no hay productos.<br>Agregá el primero desde el panel izquierdo.</p>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let products = [];
+let editingId = null;
+let currentImages = [];
+let currentFilter = 'Todos';
+
+async function loadProducts() {
+  try {
+    const r = await window.storage.get('zenda-products');
+    if (r && r.value) products = JSON.parse(r.value);
+  } catch(e) { products = []; }
+  render();
+}
+
+async function saveProducts() {
+  try {
+    await window.storage.set('zenda-products', JSON.stringify(products));
+  } catch(e) { showToast('Error al guardar', false); }
+}
+
+function getVals() {
+  return {
+    name: document.getElementById('prod-name').value.trim(),
+    cat: document.getElementById('prod-cat').value,
+    price: document.getElementById('prod-price').value,
+    desc: document.getElementById('prod-desc').value.trim(),
+    sizes: document.getElementById('prod-sizes').value.trim(),
+  };
+}
+
+function saveProduct() {
+  const v = getVals();
+  if (!v.name) { showToast('Poné el nombre de la prenda', false); return; }
+  if (!v.price) { showToast('Falta el precio', false); return; }
+
+  if (editingId !== null) {
+    const idx = products.findIndex(p => p.id === editingId);
+    if (idx !== -1) {
+      products[idx] = { ...products[idx], ...v, images: currentImages.length ? currentImages : products[idx].images };
+    }
+    showToast('✓ Producto actualizado');
+    cancelEdit();
+  } else {
+    const prod = { id: Date.now(), ...v, images: currentImages };
+    products.unshift(prod);
+    showToast('✓ Producto agregado');
+    clearForm();
+  }
+  saveProducts();
+  render();
+}
+
+function editProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+  currentImages = p.images || [];
+  document.getElementById('prod-name').value = p.name;
+  document.getElementById('prod-cat').value = p.cat;
+  document.getElementById('prod-price').value = p.price;
+  document.getElementById('prod-desc').value = p.desc;
+  document.getElementById('prod-sizes').value = p.sizes || '';
+  document.getElementById('form-mode-label').textContent = 'Editando producto';
+  document.getElementById('save-btn').textContent = 'Guardar cambios';
+  document.getElementById('cancel-btn').style.display = 'block';
+  renderThumbs();
+  document.querySelector('.sidebar').scrollTop = 0;
+  render();
+}
+
+function cancelEdit() {
+  editingId = null;
+  clearForm();
+  document.getElementById('form-mode-label').textContent = 'Agregar producto';
+  document.getElementById('save-btn').textContent = 'Guardar producto';
+  document.getElementById('cancel-btn').style.display = 'none';
+  render();
+}
+
+function deleteProduct(id) {
+  products = products.filter(p => p.id !== id);
+  saveProducts();
+  render();
+  showToast('Producto eliminado');
+}
+
+function clearForm() {
+  ['prod-name','prod-price','prod-desc','prod-sizes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('prod-cat').value = 'Remeras';
+  currentImages = [];
+  renderThumbs();
+}
+
+function filterCat(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function render() {
+  const cats = ['Todos', ...new Set(products.map(p => p.cat))];
+  const fb = document.getElementById('filter-bar');
+  fb.innerHTML = cats.map(c =>
+    `<button class="filter-btn${c === currentFilter ? ' active' : ''}" onclick="filterCat('${c}', this)">${c}</button>`
+  ).join('');
+
+  const filtered = currentFilter === 'Todos' ? products : products.filter(p => p.cat === currentFilter);
+  const grid = document.getElementById('products-grid');
+  const empty = document.getElementById('empty-state');
+  const cnt = document.getElementById('count-badge');
+
+  cnt.textContent = products.length + (products.length === 1 ? ' producto' : ' productos');
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = filtered.map(p => {
+    const img = p.images && p.images.length
+      ? `<img class="prod-img" src="${p.images[0]}" alt="${p.name}">`
+      : `<div class="prod-img-placeholder">👕</div>`;
+    const editing = editingId === p.id ? ' editing' : '';
+    const formattedPrice = Number(p.price).toLocaleString('es-AR');
+    return `
+      <div class="prod-card${editing}">
+        ${img}
+        <div class="prod-body">
+          <div class="prod-badge">${p.cat}</div>
+          <div class="prod-name">${p.name}</div>
+          <div class="prod-desc">${p.desc || 'Sin descripción'}</div>
+          ${p.sizes ? `<div style="font-size:0.7rem;color:var(--muted);margin-bottom:0.4rem">Talles: ${p.sizes}</div>` : ''}
+          <div class="prod-price">$${formattedPrice}</div>
+          <div class="prod-actions">
+            <button class="btn-edit" onclick="editProduct(${p.id})">✏️ Editar</button>
+            <button class="btn-del" onclick="deleteProduct(${p.id})">🗑️ Borrar</button>
+          </div>
+          ${p.images && p.images.length > 1 ? `<div style="font-size:0.68rem;color:var(--muted);margin-top:0.4rem">${p.images.length} fotos</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderThumbs() {
+  const row = document.getElementById('thumbs-row');
+  const counter = document.getElementById('img-counter');
+  row.innerHTML = currentImages.map((src, i) =>
+    `<div class="mini-thumb">
+      <img src="${src}" alt="foto ${i+1}">
+      <button onclick="removeImg(${i})">×</button>
+    </div>`
+  ).join('');
+  counter.textContent = currentImages.length > 0 ? `${currentImages.length} imagen${currentImages.length > 1 ? 'es' : ''} cargada${currentImages.length > 1 ? 's' : ''}` : '';
+}
+
+function removeImg(idx) {
+  currentImages.splice(idx, 1);
+  renderThumbs();
+}
+
+document.getElementById('img-input').addEventListener('change', function(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  let loaded = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      currentImages.push(ev.target.result);
+      loaded++;
+      if (loaded === files.length) renderThumbs();
+    };
+    reader.readAsDataURL(file);
+  });
+  this.value = '';
+});
+
+function showToast(msg, ok = true) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (ok ? ' success' : '');
+  setTimeout(() => t.className = 'toast', 2800);
+}
+
+function exportJSON() {
+  const data = JSON.stringify(products, null, 2);
+  const blob = new Blob([data], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'zenda-catalogo.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+loadProducts();
+</script>
