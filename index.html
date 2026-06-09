@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenda Store</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <nav>
+            <h1>Zenda Store</h1>
+            <ul>
+                <li><a href="#">Inicio</a></li>
+                <li><a href="#">Catálogo</a></li>
+                <li><a href="#">Ofertas</a></li>
+                <li><a href="#">Contacto</a></li>
+            </ul>
+            <button id="cart-btn">🛒 Carrito (<span id="cart-count">0</span>)</button>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h2>Tu estilo, tu camino</h2>
+        <p>Descubre las mejores tendencias en Zenda Store.</p>
+        <button>Comprar Ahora</button>
+    </section>
+
+    <section class="search">
+        <input type="text" id="searchInput" placeholder="Buscar productos...">
+    </section>
+
+    <section class="products" id="products">
+
+        <div class="product">
+            <img src="img/producto1.jpg" alt="Producto">
+            <h3>Remera Oversize</h3>
+            <p>$15.000</p>
+            <button onclick="addToCart()">Agregar al carrito</button>
+        </div>
+
+        <div class="product">
+            <img src="img/producto2.jpg" alt="Producto">
+            <h3>Buzo Urbano</h3>
+            <p>$25.000</p>
+            <button onclick="addToCart()">Agregar al carrito</button>
+        </div>
+
+        <div class="product">
+            <img src="img/producto3.jpg" alt="Producto">
+            <h3>Jean Cargo</h3>
+            <p>$30.000</p>
+            <button onclick="addToCart()">Agregar al carrito</button>
+        </div>
+
+    </section>
+
+    <section class="virtual">
+        <h2>Probador Virtual</h2>
+        <p>Sube tu foto y visualiza cómo te quedaría una prenda.</p>
+        <input type="file" id="upload">
+        <img id="preview" style="display:none;">
+    </section>
+
+    <footer>
+        <p>© 2026 Zenda Store - Todos los derechos reservados</p>
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
